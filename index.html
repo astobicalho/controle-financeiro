@@ -1,376 +1,265 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Finanças">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2910/2910311.png">
-<link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UP - Controle de Contas Mensais</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;700&display=swap" rel="stylesheet">
+    <title>Finanças - Urbano Publicidade</title>
     
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2910/2910311.png">
+
     <style>
-/* Nova cor para a linha inteira quando PAGO */
-.linha-paga {
-    background-color: #e3f2fd !important; /* Azul bem claro */
-    transition: 0.3s;
-}
-
-.linha-paga td {
-    color: #0d47a1 !important; /* Texto em azul escuro para leitura */
-}
-
-/* Ajuste nos botões para não sumirem no azul */
-.linha-paga .btn-status {
-    border-color: #bbdefb;
-}
         :root {
-            --bg-main: #f0f2f5;
-            --bg-card: #ffffff;
+            --bg-dark: #121212;
+            --card-bg: #ffffff;
             --neon-green: #00a82d;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            --danger: #d32f2f;
-            --border: #e0e0e0;
+            --neon-blue: #007bff;
+            --danger: #dc3545;
+            --text-primary: #333;
+            --text-secondary: #666;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            font-family: 'Noto Sans JP', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
             margin: 0;
-            user-select: none;
+            padding: 10px;
+            color: var(--text-primary);
         }
 
-        .wire-title {
+        .header-neon {
+            background: var(--bg-dark);
+            color: #fff;
+            padding: 15px;
             text-align: center;
-            font-size: 2.2rem;
-            color: #fff;
-            -webkit-text-stroke: 1.5px var(--neon-green);
-            background-color: #1a1a1a;
-            padding: 30px 0;
-            margin: 0 0 30px 0;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 168, 45, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid var(--neon-green);
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+        .header-neon h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: #00ff41; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        /* Ajuste para telas de celular */
-@media (max-width: 600px) {
-    /* Ajuste da tabela para mostrar a data */
-    .accounts-table th, .accounts-table td {
-        padding: 8px 4px; /* Diminui o respiro lateral */
-        font-size: 0.75rem; /* Letra um pouco menor para caber tudo */
-    }
+        .total-box {
+            background: var(--card-bg);
+            padding: 15px 5px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
 
-    /* Garante que a coluna 2 (Data) NÃO seja escondida */
-    .accounts-table th:nth-child(2), 
-    .accounts-table td:nth-child(2) {
-        display: table-cell !important; 
-        width: 70px; /* Define um tamanho fixo para a data */
-    }
+        .total-box span { display: block; font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
 
-    .btn-status {
-        padding: 4px 5px;
-        font-size: 0.6rem;
-    }
+        .form-container {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
 
-    /* Cards de cima um pouco menores para não ocupar a tela toda */
-    .total-box {
-        padding: 10px 5px;
-    }
-    .total-box span {
-        font-size: 1rem;
-    }
-}
-        label { font-size: 0.8rem; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 5px; }
-        input { background: #fff; border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 4px; outline: none; width: 100%; box-sizing: border-box; }
-        input:focus { border-color: var(--neon-green); }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
 
-        button.add-btn {
-            background: var(--neon-green);
-            color: #fff;
+        .btn-add {
+            background-color: var(--neon-green);
+            color: white;
             border: none;
-            padding: 12px 25px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        /* ESTILO DOS BOTÕES DE STATUS NA TABELA */
-        .btn-status {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
-            border: 1px solid transparent;
-            text-transform: uppercase;
         }
 
-        .status-paid { background-color: #e8f5e9 !important; color: #1b5e20 !important; border-color: #c8e6c9 !important; }
-        .status-pending { background-color: #ffebee !important; color: #b71c1c !important; border-color: #ffcdd2 !important; }
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-        .accounts-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        th { background: #f8f9fa; border-bottom: 2px solid var(--border); text-align: left; padding: 18px; color: var(--text-secondary); font-size: 0.9rem; }
-        td { padding: 18px; border-bottom: 1px solid var(--border); }
-        tr:hover { background-color: #f9fffb; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #eee; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
 
-        .total-box { margin-top: 25px; text-align: right; font-size: 1.4rem; font-weight: bold; padding: 20px; background: var(--bg-card); border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        footer { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 0.85rem; }
-/* Ajuste para ecrãs de telemóvel */
-@media (max-width: 600px) {
-    .account-form {
-        grid-template-columns: 1fr; /* Coloca um campo debaixo do outro */
-    }
-    .wire-title {
-        font-size: 1.5rem;
-    }
-    .accounts-table th:nth-child(2), 
-    .accounts-table td:nth-child(2) {
-        display: none; /* Esconde a data em ecrãs muito pequenos se faltar espaço */
-    }
-}
+        .row-pago { background-color: #e3f2fd !important; border-left: 5px solid var(--neon-blue); }
+        .btn-status { background: #e0e0e0; border: none; padding: 5px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
+        .btn-pago { background: var(--neon-blue); color: white; }
+        .btn-delete { color: #ccc; cursor: pointer; margin-left: 10px; font-size: 0.9rem; border: none; background: none; }
 
-/* Estilo para mostrar que o valor é editável */
-.valor-editavel {
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: 0.2s;
-}
-
-.valor-editavel:hover {
-    background-color: rgba(0, 168, 45, 0.1); /* Um verde bem clarinho no hover */
-    outline: 1px dashed var(--neon-green);
-}
-
-/* Esconde as setinhas do input de número dentro da tabela */
-.input-edicao {
-    width: 100px;
-    padding: 4px;
-    border: 1px solid var(--neon-green);
-    border-radius: 4px;
-    font-family: inherit;
-    font-weight: bold;
-}
+        @media (max-width: 600px) {
+            .dashboard { grid-template-columns: 1fr 1fr 1fr; }
+            table th:nth-child(2), table td:nth-child(2) { display: table-cell; width: 60px; }
+        }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body>
 
-    <div class="container">
-    <h1 class="wire-title">Meu Controle Financeiro</h1>
+    <div class="header-neon">
+        <h1>MEU CONTROLE FINANCEIRO</h1>
+    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
-        <div class="total-box" 
-     onclick="window.editarTotalEntradas()" 
-     style="text-align: center; border-top: 4px solid var(--neon-green); cursor: pointer;">
-    <div style="font-size: 0.8rem; color: var(--text-secondary);">Entradas (+)</div>
-    <span id="total-entradas" style="color: var(--neon-green); font-weight: bold;">R$ 0,00</span>
-</div>
-        <div class="total-box" style="text-align: center; border-top: 4px solid var(--danger);">
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Saídas (-)</div>
+    <div class="dashboard">
+        <div class="total-box" onclick="window.editarTotal('entradas')" style="border-top: 4px solid var(--neon-green);">
+            <small>Entradas (+)</small>
+            <span id="total-entradas" style="color: var(--neon-green);">R$ 0,00</span>
+        </div>
+        <div class="total-box" style="border-top: 4px solid var(--danger);">
+            <small>Saídas (-)</small>
             <span id="total-saidas" style="color: var(--danger);">R$ 0,00</span>
         </div>
-        <div class="total-box" style="text-align: center; border-top: 4px solid #007bff;">
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Saldo Geral</div>
-            <span id="total-saldo">R$ 0,00</span>
+        <div class="total-box" style="border-top: 4px solid #333;">
+            <small>Saldo Geral</small>
+            <span id="total-geral">R$ 0,00</span>
         </div>
     </div>
 
-    <div class="account-form">
-        <div>
-            <label>Descrição</label>
-            <input type="text" id="desc" placeholder="Ex: Salário, Aluguel...">
-        </div>
-        <div>
-            <label>Tipo</label>
-            <select id="tipo" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 4px; background: white;">
-                <option value="saida">Saída (-)</option>
-                <option value="entrada">Entrada (+)</option>
-            </select>
-        </div>
-        <div>
-            <label>Valor (R$)</label>
-            <input type="number" id="valor" placeholder="0,00">
-        </div>
-        <div>
-            <label>Data</label>
-            <input type="date" id="data">
-        </div>
-        <button class="add-btn" onclick="adicionarConta()">ADICIONAR</button>
+    <div class="form-container">
+        <input type="text" id="desc" placeholder="Descrição (Ex: Salário, Aluguel...)">
+        <select id="tipo">
+            <option value="Saída (-)">Saída (-)</option>
+            <option value="Entrada (+)">Entrada (+)</option>
+        </select>
+        <input type="number" id="valor" step="0.01" placeholder="Valor (R$)">
+        <input type="date" id="data">
+        <button type="button" onclick="window.adicionarConta()" class="btn-add">ADICIONAR</button>
     </div>
 
-    <table class="accounts-table">
-        <thead>
-            <tr>
-                <th>Descrição</th>
-                <th>Data</th>
-                <th>Valor</th>
-                <th>Status / Ação</th>
-            </tr>
-        </thead>
-        <tbody id="lista-contas"></tbody>
-    </table>
-</div>
-    <footer>
-        By: AstoBicalho - Developer - 2026 | UP - Urbano Publicidade
-    </footer>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="lista-contas">
+                </tbody>
+        </table>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { 
-    getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc 
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBmQmDlSQz_ewf_szWCGCgSDEuEC13GbK4",
-    authDomain: "controle-de-contas-8a0fc.firebaseapp.com",
-    projectId: "controle-de-contas-8a0fc",
-    storageBucket: "controle-de-contas-8a0fc.firebasestorage.app",
-    messagingSenderId: "88972805126",
-    appId: "1:88972805126:web:da71d9986fe39aba5d6f87",
-    measurementId: "G-G7MEE6ZB3Q"
-  };
+        // CONFIGURAÇÃO DO SEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmQmDlSQz_ewf_szWCGCgSDEuEC13GbK4",
+            authDomain: "controle-de-contas-8a0fc.firebaseapp.com",
+            projectId: "controle-de-contas-8a0fc",
+            storageBucket: "controle-de-contas-8a0fc.firebasestorage.app",
+            messagingSenderId: "88972805126",
+            appId: "1:88972805126:web:da71d9986fe39aba5d6f87",
+            measurementId: "G-G7MEE6ZB3Q"
+        };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const contasRef = collection(db, "contas");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  // FUNÇÃO EDITAR
-  window.editarValor = async (id, valorAtual) => {
-    const novo = prompt("Novo valor (Use ponto para centavos):", valorAtual);
-    if (novo !== null && novo !== "" && !isNaN(novo.replace(',', '.'))) {
-      try {
-        await updateDoc(doc(db, "contas", id), { 
-          valor: parseFloat(novo.replace(',', '.')) 
+        // --- FUNÇÃO ADICIONAR ---
+        window.adicionarConta = async () => {
+            const desc = document.getElementById('desc').value;
+            const valor = document.getElementById('valor').value;
+            const tipo = document.getElementById('tipo').value;
+            const data = document.getElementById('data').value;
+
+            if (!desc || !valor) { alert("Preencha Descrição e Valor!"); return; }
+
+            try {
+                await addDoc(collection(db, "contas"), {
+                    descricao: desc,
+                    valor: parseFloat(valor.replace(',', '.')),
+                    tipo: tipo,
+                    data: data,
+                    status: "PENDENTE",
+                    timestamp: new Date()
+                });
+                document.getElementById('desc').value = "";
+                document.getElementById('valor').value = "";
+            } catch (e) {
+                alert("Erro ao salvar: " + e.message);
+            }
+        };
+
+        // --- FUNÇÃO ALTERAR STATUS (PAGO) ---
+        window.alternarStatus = async (id, statusAtual) => {
+            const novoStatus = statusAtual === "PAGO" ? "PENDENTE" : "PAGO";
+            await updateDoc(doc(db, "contas", id), { status: novoStatus });
+        };
+
+        // --- FUNÇÃO EXCLUIR ---
+        window.excluirConta = async (id) => {
+            if (confirm("Deseja excluir este lançamento?")) {
+                await deleteDoc(doc(db, "contas", id));
+            }
+        };
+
+        // --- LEITURA EM TEMPO REAL ---
+        const q = query(collection(db, "contas"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById('lista-contas');
+            tbody.innerHTML = "";
+            let entradas = 0, saidas = 0;
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const id = doc.id;
+                const valorNum = parseFloat(item.valor);
+
+                if (item.tipo.includes('+')) entradas += valorNum;
+                else saidas += valorNum;
+
+                const classePago = item.status === "PAGO" ? "row-pago" : "";
+                const btnClasse = item.status === "PAGO" ? "btn-status btn-pago" : "btn-status";
+                
+                // Formatação de data simples para celular
+                const dataFormatada = item.data ? item.data.split('-').reverse().slice(0,2).join('/') : '--/--';
+
+                tbody.innerHTML += `
+                    <tr class="${classePago}">
+                        <td>${item.descricao}</td>
+                        <td>${dataFormatada}</td>
+                        <td style="color: ${item.tipo.includes('+') ? 'green' : 'red'}">
+                            ${valorNum.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}
+                        </td>
+                        <td>
+                            <button class="${btnClasse}" onclick="window.alternarStatus('${id}', '${item.status}')">
+                                ${item.status}
+                            </button>
+                            <button class="btn-delete" onclick="window.excluirConta('${id}')">[X]</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('total-entradas').innerText = entradas.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
+            document.getElementById('total-saidas').innerText = saidas.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
+            document.getElementById('total-geral').innerText = (entradas - saidas).toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
         });
-      } catch (e) { alert("Erro ao editar: " + e.message); }
-    }
-  };
+    </script>
 
-  // FUNÇÃO ADICIONAR
- // Substitua sua função de adicionar por esta para testar:
-const adicionarConta = async () => {
-    const descricao = document.getElementById('desc').value;
-    const valor = document.getElementById('valor').value;
-    const tipo = document.getElementById('tipo').value;
-    const data = document.getElementById('data').value;
-
-    if (!descricao || !valor) {
-        alert("Preencha os campos!");
-        return;
-    }
-
-    try {
-        await addDoc(collection(db, "contas"), {
-            descricao,
-            valor: parseFloat(valor.replace(',', '.')),
-            tipo,
-            data,
-            status: "PENDENTE",
-            timestamp: new Date()
-        });
-        alert("Salvo com sucesso!"); // Se aparecer isso, funcionou!
-        document.getElementById('desc').value = '';
-        document.getElementById('valor').value = '';
-    } catch (error) {
-        console.error("Erro ao salvar:", error);
-        alert("Erro do Firebase: " + error.message); // Isso vai nos dizer o problema real
-    }
-};
-
-  // STATUS E EXCLUIR
-  window.alternarStatus = async (id, statusAtual) => {
-    const novoStatus = statusAtual === "pendente" ? "pago" : "pendente";
-    await updateDoc(doc(db, "contas", id), { status: novoStatus });
-  };
-
-  window.excluirConta = async (id) => {
-    if(confirm("Excluir conta?")) await deleteDoc(doc(db, "contas", id));
-  };
-
-  // LEITURA EM TEMPO REAL
-  const q = query(contasRef, orderBy("vencimento", "asc"));
-  onSnapshot(q, (snapshot) => {
-    const lista = document.getElementById('lista-contas');
-    let ent = 0, sai = 0;
-    lista.innerHTML = '';
-
-    snapshot.forEach((docSnap) => {
-      const c = docSnap.data();
-      const id = docSnap.id;
-      if (c.tipo === 'entrada') ent += c.valor; else sai += c.valor;
-
-      const cor = c.tipo === 'entrada' ? 'var(--neon-green)' : 'var(--danger)';
-      const sinal = c.tipo === 'entrada' ? '+' : '-';
-      const classeLinha = c.status === 'pago' ? 'linha-paga' : '';
-
-      lista.innerHTML += `
-        <tr class="${classeLinha}">
-          <td>${c.descricao}</td>
-          <td>${formatarData(c.vencimento)}</td>
-          <td onclick="editarValor('${id}', ${c.valor})" style="color:${cor}; font-weight:bold; cursor:pointer;">
-            ${sinal} R$ ${c.valor.toFixed(2)}
-          </td>
-          <td>
-            <button class="btn-status ${c.status === 'pago' ? 'status-paid' : 'status-pending'}" 
-                    onclick="alternarStatus('${id}', '${c.status}')">
-              ${c.status.toUpperCase()}
-            </button>
-            <button onclick="excluirConta('${id}')" style="border:none; background:none; color:#ccc; cursor:pointer; margin-left:10px;">[X]</button>
-          </td>
-        </tr>`;
-    });
-
-    document.getElementById('total-entradas').innerText = `R$ ${ent.toFixed(2)}`;
-    document.getElementById('total-saidas').innerText = `R$ ${sai.toFixed(2)}`;
-    const saldo = ent - sai;
-    const elS = document.getElementById('total-saldo');
-    elS.innerText = `R$ ${saldo.toFixed(2)}`;
-    elS.style.color = saldo < 0 ? 'var(--danger)' : 'var(--text-primary)';
-  });
-
-  function formatarData(d) {
-    if(!d) return "";
-    const [a, m, dia] = d.split('-');
-    return `${dia}/${m}`; // Exibe 17/03 em vez de 17/03/2026
-}
-window.editarTotalEntradas = async () => {
-    const valorAtual = document.getElementById('total-entradas').innerText.replace('R$ ', '');
-    const novoValor = prompt("Ajustar total de entradas para:", valorAtual);
-
-    if (novoValor !== null && !isNaN(novoValor.replace(',', '.'))) {
-        // Se você quiser que esse valor reflita no banco, 
-        // precisaríamos criar um documento fixo de "Ajuste" no Firebase.
-        // Por enquanto, esta função altera o visual na tela:
-        document.getElementById('total-entradas').innerText = `R$ ${parseFloat(novoValor.replace(',', '.')).toFixed(2)}`;
-        
-        // Dica: Para salvar no banco, o ideal é lançar uma "Entrada" 
-        // com a descrição "Ajuste de Saldo".
-    }
-};
     <script>
-    // Bloqueia o clique direito
-    document.addEventListener('contextmenu', event => event.preventDefault());
-
-    // Bloqueia atalhos de desenvolvedor (F12, Ctrl+Shift+I, etc)
-    document.onkeydown = function(e) {
-        if (e.keyCode == 123) return false; // F12
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-    };
-</script>
-</script>
+        // BLINDAGEM - Bloqueia clique direito e F12
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 67 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+    </script>
 </body>
 </html>
