@@ -258,30 +258,35 @@
   };
 
   // FUNÇÃO ADICIONAR
-  window.adicionarConta = async () => {
-    const desc = document.getElementById('desc').value;
+ // Substitua sua função de adicionar por esta para testar:
+const adicionarConta = async () => {
+    const descricao = document.getElementById('desc').value;
     const valor = document.getElementById('valor').value;
-    const data = document.getElementById('data').value;
     const tipo = document.getElementById('tipo').value;
+    const data = document.getElementById('data').value;
 
-    if (!desc || !valor || !data) {
-      alert("Preencha tudo!");
-      return;
+    if (!descricao || !valor) {
+        alert("Preencha os campos!");
+        return;
     }
 
     try {
-      await addDoc(contasRef, {
-        descricao: desc,
-        valor: parseFloat(valor),
-        vencimento: data,
-        tipo: tipo,
-        status: "pendente",
-        criadoEm: new Date()
-      });
-      document.getElementById('desc').value = '';
-      document.getElementById('valor').value = '';
-    } catch (e) { alert(e.message); }
-  };
+        await addDoc(collection(db, "contas"), {
+            descricao,
+            valor: parseFloat(valor.replace(',', '.')),
+            tipo,
+            data,
+            status: "PENDENTE",
+            timestamp: new Date()
+        });
+        alert("Salvo com sucesso!"); // Se aparecer isso, funcionou!
+        document.getElementById('desc').value = '';
+        document.getElementById('valor').value = '';
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        alert("Erro do Firebase: " + error.message); // Isso vai nos dizer o problema real
+    }
+};
 
   // STATUS E EXCLUIR
   window.alternarStatus = async (id, statusAtual) => {
