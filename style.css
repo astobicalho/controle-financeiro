@@ -1,0 +1,181 @@
+:root {
+    --primary-color: #2c3e50;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+/* Dashboard Cards */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.card:hover { transform: translateY(-5px); }
+
+.card span { font-size: 0.9rem; color: #7f8c8d; }
+
+.income h2 { color: var(--success-color); }
+.expense h2 { color: var(--danger-color); }
+
+/* Form */
+.form-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+input, select, button {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+input { flex: 2; }
+button {
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: filter 0.2s;
+}
+
+button:hover { filter: brightness(1.2); }
+
+/* Tabela */
+.transaction-list {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th { background: #fafafa; font-weight: 600; }
+
+.columnAction { text-align: right; width: 50px; }
+
+.delete-btn {
+    color: var(--danger-color);
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+/* Efeito AstoBicalho Developer */
+.header-title {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 3rem;
+    color: transparent;
+    -webkit-text-stroke: 1.2px #00e676; /* O "Wire" verde neon */
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-align: center;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from { filter: drop-shadow(0 0 2px #00e676); }
+    to { filter: drop-shadow(0 0 15px #00e676); }
+}
+/* Estilo do Loading Overlay */
+.loader-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+.loader-content { text-align: center; }
+
+.loader-logo {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 5rem;
+    color: transparent;
+    -webkit-text-stroke: 2px #00e676; /* Verde UP */
+    filter: drop-shadow(0 0 15px #00e676);
+    margin: 0;
+    animation: upPulse 1.5s infinite alternate;
+}
+
+@keyframes upPulse {
+    from { transform: scale(1); opacity: 0.7; }
+    to { transform: scale(1.1); opacity: 1; }
+}
+
+.loader-bar {
+    width: 150px;
+    height: 3px;
+    background: #222;
+    margin: 20px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.loader-bar::after {
+    content: '';
+    position: absolute;
+    width: 60px; height: 100%;
+    background: #00e676;
+    animation: loadingBar 1s infinite linear;
+}
+
+@keyframes loadingBar {
+    0% { left: -60px; }
+    100% { left: 150px; }
+}

@@ -1,0 +1,16 @@
+{
+  "short_name": "Finanças",
+  "name": "Meu Controle Financeiro",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2910/2910311.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#00a82d"
+}
