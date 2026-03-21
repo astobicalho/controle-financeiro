@@ -226,39 +226,43 @@
             const icones = { "Água":"💧","Luz":"⚡","Gás":"🔥","Cartão/Crédito":"💳","Celular":"📱","Cerrado":"🌳","Iptu":"🏠","Internet":"🌐","Empréstimo":"💸","Pres. Carro":"🚗","Outros":"📁" };
             const classes = { "Água":"cat-agua","Luz":"cat-luz","Gás":"cat-gas","Cartão/Crédito":"cat-cartao","Celular":"cat-celular","Cerrado":"cat-cerrado","Iptu":"cat-iptu","Internet":"cat-internet","Empréstimo":"cat-emprestimo","Pres. Carro":"cat-carro","Outros":"cat-outros" };
 
-            snapshot.forEach((doc) => {
-                const item = doc.data();
-                const v = parseFloat(item.valor);
-                const catStr = item.categoria || "Outros";
-                const displayAcoes = acoesVisiveis ? 'inline-block' : 'none';
+            // Localize esta parte dentro da função carregarDados:
+snapshot.forEach((doc) => {
+    const item = doc.data();
+    const v = parseFloat(item.valor);
+    const catStr = item.categoria || "Outros";
+    const displayAcoes = acoesVisiveis ? 'inline-block' : 'none';
 
-                if (item.tipo === "+") {
-                    ent += v;
-                    tbodyEntradas.innerHTML += `
-                        <tr>
-                            <td>${item.descricao}</td>
-                            <td>${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td>
-                            <td style="text-align:right;">
-                                <button class="btn-acao btn-edit" style="display:inline-block" onclick="window.prepararEdicao('${doc.id}')">✎</button>
-                                <button class="btn-acao btn-delete" style="display:inline-block" onclick="window.excluirConta('${doc.id}')">✖</button>
-                            </td>
-                        </tr>`;
-                } else {
-                    sai += v;
-                    resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
-                    tbodyGastos.innerHTML += `
-                        <tr class="${item.status === 'PAGO' ? 'row-pago' : ''}">
-                            <td><strong>${item.descricao}</strong><br><span class="categoria-badge ${classes[catStr]}">${icones[catStr]} ${catStr}</span></td>
-                            <td style="color:var(--saida); font-weight:bold;">${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}<br>
-                                <button class="btn-status ${item.status === 'PAGO' ? 'btn-pago' : ''}" onclick="window.alternarStatus('${doc.id}','${item.status}')">${item.status}</button>
-                            </td>
-                            <td style="text-align:right;">
-                                <button class="btn-acao btn-edit" style="display:${displayAcoes}" onclick="window.prepararEdicao('${doc.id}')">✎</button>
-                                <button class="btn-acao btn-delete" style="display:${displayAcoes}" onclick="window.excluirConta('${doc.id}')">✖</button>
-                            </td>
-                        </tr>`;
-                }
-            });
+    // AJUSTE AQUI: O segredo está em checar o item.tipo CORRETAMENTE
+    if (item.tipo === "+") { 
+        // Se for Entrada (+), vai para a tabela de receitas
+        ent += v;
+        tbodyEntradas.innerHTML += `
+            <tr>
+                <td>${item.descricao}</td>
+                <td>${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td>
+                <td style="text-align:right;">
+                    <button class="btn-acao btn-edit" style="display:inline-block" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                    <button class="btn-acao btn-delete" style="display:inline-block" onclick="window.excluirConta('${doc.id}')">✖</button>
+                </td>
+            </tr>`;
+    } else {
+        // Se for Saída (-), vai para a lista de despesas
+        sai += v;
+        resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
+        tbodyGastos.innerHTML += `
+            <tr class="${item.status === 'PAGO' ? 'row-pago' : ''}">
+                <td><strong>${item.descricao}</strong><br><span class="categoria-badge ${classes[catStr] || 'cat-outros'}">${icones[catStr] || '📁'} ${catStr}</span></td>
+                <td style="color:var(--saida); font-weight:bold;">${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}<br>
+                    <button class="btn-status ${item.status === 'PAGO' ? 'btn-pago' : ''}" onclick="window.alternarStatus('${doc.id}','${item.status}')">${item.status}</button>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn-acao btn-edit" style="display:${displayAcoes}" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                    <button class="btn-acao btn-delete" style="display:${displayAcoes}" onclick="window.excluirConta('${doc.id}')">✖</button>
+                </td>
+            </tr>`;
+    }
+});
             document.getElementById('totalEntradas').innerText = ent.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             document.getElementById('totalSaidas').innerText = sai.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             document.getElementById('saldoFinal').innerText = (ent - sai).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
