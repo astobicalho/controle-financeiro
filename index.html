@@ -1,15 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanças do Mês</title>
+    <title>Finanças - Urbano Publicidade</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text: #e0e0e0;
+            --primary: #bb86fc;
+            --entrada: #10ac84;
+            --saida: #ee5253;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 500px; flex: 1; }
+        .card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #333; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: #fff; box-sizing: border-box; font-size: 16px; }
+        
+        button { 
+            width: 100%; padding: 12px; background: transparent; border: 2px solid var(--primary); border-radius: 8px; color: var(--primary); font-weight: bold; cursor: pointer; margin-top: 10px; 
+            transition: all 0.3s ease; 
+        }
+        button:active { background: var(--primary); color: #000; transform: scale(0.98); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 10px 5px; text-align: left; border-bottom: 1px solid #333; }
+        
+        .categoria-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; color: white; text-transform: uppercase; margin-top: 4px; }
+        .cat-agua { background-color: #3498db; } .cat-luz { background-color: #f1c40f; color: #000; }
+        .cat-gas { background-color: #e67e22; } .cat-cartao { background-color: #9b59b6; }
+        .cat-celular { background-color: #2ecc71; } .cat-cerrado { background-color: #27ae60; }
+        .cat-iptu { background-color: #e74c3c; } .cat-internet { background-color: #1abc9c; }
+        .cat-emprestimo { background-color: #7f8c8d; } .cat-carro { background-color: #34495e; }
+        .cat-outros { background-color: #95a5a6; }
+
+        .btn-acao { padding: 8px; font-size: 12px; border-radius: 6px; border: 1px solid #fff; cursor: pointer; color: white; margin-left: 4px; display: none; background: transparent; min-width: 35px; }
+        .btn-edit { border-color: #f39c12; color: #f39c12; }
+        .btn-delete { border-color: var(--saida); color: var(--saida); }
+        .btn-status { background: transparent; border: 1px solid #555; font-size: 10px; width: 100%; margin-top: 5px; color: white; border-radius: 4px; padding: 4px; }
+        .btn-pago { border-color: var(--entrada); color: var(--entrada); }
+        
+        .resumo-item { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
+        .chart-container { position: relative; height: 220px; width: 100%; }
+        #listaEntradasContainer { display: none; margin-top: 15px; border-top: 1px dashed #555; padding-top: 10px; }
+        
+        .btn-admin { background: transparent; border: 1px solid var(--primary); color: var(--primary); font-size: 11px; padding: 8px; width: auto; margin-top: 5px; }
+        
+        footer { margin-top: 20px; padding: 20px; text-align: center; font-size: 12px; color: #666; width: 100%; border-top: 1px solid #333; }
+        footer b { color: var(--primary); }
+        .row-pago { opacity: 0.5; text-decoration: line-through; }
+    </style>
 </head>
 <body>
 
@@ -83,6 +128,147 @@
     © 2026 - Urbano Publicidade
 </footer>
 
-<script type="module" src="script.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBmQmDlSQz_ewf_szWCGCgSDEuEC13GbK4",
+        authDomain: "controle-de-contas-8a0fc.firebaseapp.com",
+        projectId: "controle-de-contas-8a0fc",
+        storageBucket: "controle-de-contas-8a0fc.firebasestorage.app",
+        messagingSenderId: "88972805126",
+        appId: "1:88972805126:web:da71d9986fe39aba5d6f87"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let meuGrafico = null;
+    let acoesVisiveis = false;
+
+    window.toggleEntradas = () => {
+        const div = document.getElementById('listaEntradasContainer');
+        div.style.display = div.style.display === 'block' ? 'none' : 'block';
+    };
+
+    window.toggleAcoes = () => {
+        acoesVisiveis = !acoesVisiveis;
+        const botoes = document.querySelectorAll('.btn-acao');
+        botoes.forEach(b => b.style.display = acoesVisiveis ? 'inline-block' : 'none');
+    };
+
+    window.salvarRegistro = async () => {
+        const id = document.getElementById('editId').value;
+        const dados = {
+            descricao: document.getElementById('desc').value,
+            valor: parseFloat(document.getElementById('valor').value),
+            tipo: document.getElementById('tipo').value,
+            data: document.getElementById('data').value,
+            categoria: document.getElementById('categoria').value,
+            timestamp: new Date()
+        };
+        if (!dados.descricao || !dados.valor || !dados.data) return alert("Preencha tudo!");
+        try {
+            if (id) {
+                await updateDoc(doc(db, "contas", id), dados);
+                document.getElementById('editId').value = "";
+                document.getElementById('btnSalvar').innerText = "SALVAR REGISTRO";
+            } else {
+                await addDoc(collection(db, "contas"), { ...dados, status: "PENDENTE" });
+            }
+            document.getElementById('desc').value = ""; document.getElementById('valor').value = "";
+        } catch (e) { alert("Erro ao salvar!"); }
+    };
+
+    window.prepararEdicao = async (id) => {
+        const docRef = await getDoc(doc(db, "contas", id));
+        if (docRef.exists()) {
+            const data = docRef.data();
+            document.getElementById('editId').value = id;
+            document.getElementById('desc').value = data.descricao;
+            document.getElementById('valor').value = data.valor;
+            document.getElementById('data').value = data.data;
+            document.getElementById('categoria').value = data.categoria;
+            document.getElementById('tipo').value = data.tipo;
+            document.getElementById('btnSalvar').innerText = "ATUALIZAR AGORA";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    };
+
+    window.alternarStatus = async (id, statusAtual) => {
+        await updateDoc(doc(db, "contas", id), { status: statusAtual === "PENDENTE" ? "PAGO" : "PENDENTE" });
+    };
+
+    window.excluirConta = async (id) => { if(confirm("Apagar registro?")) await deleteDoc(doc(db, "contas", id)); };
+
+    function atualizarGrafico(dadosCategorias) {
+        const ctx = document.getElementById('graficoPizza').getContext('2d');
+        const labels = Object.keys(dadosCategorias);
+        const coresMap = { "Água":"#3498db","Luz":"#f1c40f","Gás":"#e67e22","Cartão/Crédito":"#9b59b6","Celular":"#2ecc71","Cerrado":"#27ae60","Iptu":"#e74c3c","Internet":"#1abc9c","Empréstimo":"#7f8c8d","Pres. Carro":"#34495e","Outros":"#95a5a6" };
+        if (meuGrafico) meuGrafico.destroy();
+        meuGrafico = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: Object.values(dadosCategorias), backgroundColor: labels.map(l => coresMap[l] || "#95a5a6"), borderWidth: 2, borderColor: '#1e1e1e' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e0e0e0', font: { size: 10 } } } } }
+        });
+    }
+
+    let unsubscribe; 
+    function carregarDados(mesAno) {
+        if (unsubscribe) unsubscribe();
+        const q = query(collection(db, "contas"), where("data", ">=", `${mesAno}-01`), where("data", "<=", `${mesAno}-31`), orderBy("data", "asc"));
+        unsubscribe = onSnapshot(q, (snapshot) => {
+            const tbodyGastos = document.getElementById('listaContas');
+            const tbodyEntradas = document.getElementById('listaEntradasEdit');
+            tbodyGastos.innerHTML = ""; tbodyEntradas.innerHTML = "";
+            let ent = 0, sai = 0;
+            const resumoCat = {};
+            const icones = { "Água":"💧","Luz":"⚡","Gás":"🔥","Cartão/Crédito":"💳","Celular":"📱","Cerrado":"🌳","Iptu":"🏠","Internet":"🌐","Empréstimo":"💸","Pres. Carro":"🚗","Outros":"📁" };
+            const classes = { "Água":"cat-agua","Luz":"cat-luz","Gás":"cat-gas","Cartão/Crédito":"cat-cartao","Celular":"cat-celular","Cerrado":"cat-cerrado","Iptu":"cat-iptu","Internet":"cat-internet","Empréstimo":"cat-emprestimo","Pres. Carro":"cat-carro","Outros":"cat-outros" };
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const v = parseFloat(item.valor);
+                const catStr = item.categoria || "Outros";
+                const displayAcoes = acoesVisiveis ? 'inline-block' : 'none';
+
+                if (item.tipo === "+") {
+                    ent += v;
+                    tbodyEntradas.innerHTML += `
+                        <tr>
+                            <td>${item.descricao}</td>
+                            <td>${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td>
+                            <td style="text-align:right;">
+                                <button class="btn-acao btn-edit" style="display:inline-block" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                                <button class="btn-acao btn-delete" style="display:inline-block" onclick="window.excluirConta('${doc.id}')">✖</button>
+                            </td>
+                        </tr>`;
+                } else {
+                    sai += v;
+                    resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
+                    tbodyGastos.innerHTML += `
+                        <tr class="${item.status === 'PAGO' ? 'row-pago' : ''}">
+                            <td><strong>${item.descricao}</strong><br><span class="categoria-badge ${classes[catStr]}">${icones[catStr]} ${catStr}</span></td>
+                            <td style="color:var(--saida); font-weight:bold;">${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}<br>
+                                <button class="btn-status ${item.status === 'PAGO' ? 'btn-pago' : ''}" onclick="window.alternarStatus('${doc.id}','${item.status}')">${item.status}</button>
+                            </td>
+                            <td style="text-align:right;">
+                                <button class="btn-acao btn-edit" style="display:${displayAcoes}" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                                <button class="btn-acao btn-delete" style="display:${displayAcoes}" onclick="window.excluirConta('${doc.id}')">✖</button>
+                            </td>
+                        </tr>`;
+                }
+            });
+            document.getElementById('totalEntradas').innerText = ent.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
+            document.getElementById('totalSaidas').innerText = sai.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
+            document.getElementById('saldoFinal').innerText = (ent - sai).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
+            atualizarGrafico(resumoCat);
+        });
+    }
+    const campoFiltro = document.getElementById('filtroMes');
+    campoFiltro.value = new Date().toISOString().slice(0, 7);
+    carregarDados(campoFiltro.value);
+    campoFiltro.addEventListener('change', (e) => carregarDados(e.target.value));
+</script>
 </body>
 </html>
