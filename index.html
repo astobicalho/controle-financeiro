@@ -3,271 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanças - Urbano Publicidade</title>
-    
+    <title>Finanças do Mês</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2910/2910311.png">
-
-    <style>
-        :root {
-            --bg-dark: #121212;
-            --card-bg: #ffffff;
-            --neon-green: #00a82d;
-            --neon-blue: #007bff;
-            --danger: #dc3545;
-            --text-primary: #333;
-            --text-secondary: #666;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 10px;
-            color: var(--text-primary);
-        }
-
-        .header-neon {
-            background: var(--bg-dark);
-            color: #fff;
-            padding: 15px;
-            text-align: center;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 168, 45, 0.3);
-            margin-bottom: 20px;
-            border: 1px solid var(--neon-green);
-        }
-
-        .header-neon h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; color: #00ff41; }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .total-box {
-            background: var(--card-bg);
-            padding: 15px 5px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-
-        .total-box span { display: block; font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
-
-        .form-container {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
-        }
-
-        .btn-add {
-            background-color: var(--neon-green);
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .table-container {
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #eee; padding: 10px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-
-        .row-pago { background-color: #e3f2fd !important; border-left: 5px solid var(--neon-blue); }
-        .btn-status { background: #e0e0e0; border: none; padding: 5px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
-        .btn-pago { background: var(--neon-blue); color: white; }
-        .btn-delete { color: #ccc; cursor: pointer; margin-left: 10px; font-size: 0.9rem; border: none; background: none; }
-
-        @media (max-width: 600px) {
-            .dashboard { grid-template-columns: 1fr 1fr 1fr; }
-            table th:nth-child(2), table td:nth-child(2) { display: table-cell; width: 60px; }
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div class="header-neon">
-        <h1>MEU CONTROLE FINANCEIRO</h1>
-    </div>
+<div class="container">
+    <h2 style="text-align: center; color: var(--primary);">UP - Finanças</h2>
 
-    <div class="dashboard">
-        <div class="total-box" onclick="window.editarTotal('entradas')" style="border-top: 4px solid var(--neon-green);">
-            <small>Entradas (+)</small>
-            <span id="total-entradas" style="color: var(--neon-green);">R$ 0,00</span>
-        </div>
-        <div class="total-box" style="border-top: 4px solid var(--danger);">
-            <small>Saídas (-)</small>
-            <span id="total-saidas" style="color: var(--danger);">R$ 0,00</span>
-        </div>
-        <div class="total-box" style="border-top: 4px solid #333;">
-            <small>Saldo Geral</small>
-            <span id="total-geral">R$ 0,00</span>
-        </div>
-    </div>
-
-    <div class="form-container">
-        <input type="text" id="desc" placeholder="Descrição (Ex: Salário, Aluguel...)">
-        <select id="tipo">
-            <option value="Saída (-)">Saída (-)</option>
-            <option value="Entrada (+)">Entrada (+)</option>
-        </select>
-        <input type="number" id="valor" step="0.01" placeholder="Valor (R$)">
+    <div class="card">
+        <input type="hidden" id="editId">
+        <input type="text" id="desc" placeholder="Descrição">
+        <input type="number" id="valor" placeholder="Valor R$ 0,00" step="0.01">
         <input type="date" id="data">
-        <button type="button" onclick="window.adicionarConta()" class="btn-add">ADICIONAR</button>
+        
+        <select id="categoria">
+            <option value="Água">💧 Água</option>
+            <option value="Luz">⚡ Luz</option>
+            <option value="Gás">🔥 Gás</option>
+            <option value="Cartão/Crédito">💳 Cartão/Crédito</option>
+            <option value="Celular">📱 Celular</option>
+            <option value="Cerrado">🌳 Cerrado</option>
+            <option value="Iptu">🏠 Iptu</option>
+            <option value="Internet">🌐 Internet</option>
+            <option value="Empréstimo">💸 Empréstimo</option>
+            <option value="Pres. Carro">🚗 Pres. Carro</option>
+            <option value="Outros">📁 Outros</option>
+        </select>
+
+        <select id="tipo">
+            <option value="-">🔴 Saída (Gasto)</option>
+            <option value="+">🟢 Entrada (Receita)</option>
+        </select>
+        <button id="btnSalvar" onclick="window.salvarRegistro()">SALVAR REGISTRO</button>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Data</th>
-                    <th>Valor</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody id="lista-contas">
-                </tbody>
+    <div class="card" style="padding: 10px; display: flex; align-items: center; gap: 10px; justify-content: center;">
+        <label>📅 Mês:</label>
+        <input type="month" id="filtroMes" style="margin: 0; width: auto;">
+    </div>
+
+    <div class="card">
+        <div class="chart-container"><canvas id="graficoPizza"></canvas></div>
+    </div>
+
+    <div class="card">
+        <div class="resumo-item" style="color: var(--entrada);">Entradas: <span id="totalEntradas">R$ 0,00</span></div>
+        <div class="resumo-item" style="color: var(--saida);">Saídas: <span id="totalSaidas">R$ 0,00</span></div>
+        <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+        <div class="resumo-item" style="font-size: 1.2rem;">Saldo: <span id="saldoFinal">R$ 0,00</span></div>
+        
+        <button class="btn-admin" style="color: var(--entrada); border-color: var(--entrada);" onclick="window.toggleEntradas()">⚙ GERENCIAR ENTRADAS</button>
+        
+        <div id="listaEntradasContainer">
+            <table style="width: 100%;">
+                <tbody id="listaEntradasEdit"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 10px; overflow-x: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1rem; color: var(--primary);">Lista de Despesas</h3>
+            <button class="btn-admin" onclick="window.toggleAcoes()">⚙ GERENCIAR DESPESAS</button>
+        </div>
+        <table style="width: 100%;">
+            <tbody id="listaContas"></tbody>
         </table>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<footer>
+    Desenvolvido por: <b>AstoBicalho</b><br>
+    © 2026 - Urbano Publicidade
+</footer>
 
-        // CONFIGURAÇÃO DO SEU FIREBASE
-        const firebaseConfig = {
-  apiKey: "AIzaSyBmQmDlSQz_ewf_szWCGCgSDEuEC13GbK4",
-  authDomain: "controle-de-contas-8a0fc.firebaseapp.com",
-  projectId: "controle-de-contas-8a0fc",
-  storageBucket: "controle-de-contas-8a0fc.firebasestorage.app",
-  messagingSenderId: "88972805126",
-  appId: "1:88972805126:web:da71d9986fe39aba5d6f87",
-  measurementId: "G-G7MEE6ZB3Q"
-};
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // --- FUNÇÃO ADICIONAR ---
-        window.adicionarConta = async () => {
-            const desc = document.getElementById('desc').value;
-            const valor = document.getElementById('valor').value;
-            const tipo = document.getElementById('tipo').value;
-            const data = document.getElementById('data').value;
-
-            if (!desc || !valor) { alert("Preencha Descrição e Valor!"); return; }
-
-            try {
-                await addDoc(collection(db, "contas"), {
-                    descricao: desc,
-                    valor: parseFloat(valor.replace(',', '.')),
-                    tipo: tipo,
-                    data: data,
-                    status: "PENDENTE",
-                    timestamp: new Date()
-                });
-                document.getElementById('desc').value = "";
-                document.getElementById('valor').value = "";
-            } catch (e) {
-                alert("Erro ao salvar: " + e.message);
-            }
-        };
-
-        // --- FUNÇÃO ALTERAR STATUS (PAGO) ---
-        window.alternarStatus = async (id, statusAtual) => {
-            const novoStatus = statusAtual === "PAGO" ? "PENDENTE" : "PAGO";
-            await updateDoc(doc(db, "contas", id), { status: novoStatus });
-        };
-
-        // --- FUNÇÃO EXCLUIR ---
-        window.excluirConta = async (id) => {
-            if (confirm("Deseja excluir este lançamento?")) {
-                await deleteDoc(doc(db, "contas", id));
-            }
-        };
-
-        // --- LEITURA EM TEMPO REAL ---
-        const q = query(collection(db, "contas"), orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const tbody = document.getElementById('lista-contas');
-            tbody.innerHTML = "";
-            let entradas = 0, saidas = 0;
-
-            snapshot.forEach((doc) => {
-                const item = doc.data();
-                const id = doc.id;
-                const valorNum = parseFloat(item.valor);
-
-                if (item.tipo.includes('+')) entradas += valorNum;
-                else saidas += valorNum;
-
-                const classePago = item.status === "PAGO" ? "row-pago" : "";
-                const btnClasse = item.status === "PAGO" ? "btn-status btn-pago" : "btn-status";
-                
-                // Formatação de data simples para celular
-                const dataFormatada = item.data ? item.data.split('-').reverse().slice(0,2).join('/') : '--/--';
-
-                tbody.innerHTML += `
-                    <tr class="${classePago}">
-                        <td>${item.descricao}</td>
-                        <td>${dataFormatada}</td>
-                        <td style="color: ${item.tipo.includes('+') ? 'green' : 'red'}">
-                            ${valorNum.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}
-                        </td>
-                        <td>
-                            <button class="${btnClasse}" onclick="window.alternarStatus('${id}', '${item.status}')">
-                                ${item.status}
-                            </button>
-                            <button class="btn-delete" onclick="window.excluirConta('${id}')">[X]</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('total-entradas').innerText = entradas.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
-            document.getElementById('total-saidas').innerText = saidas.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
-            document.getElementById('total-geral').innerText = (entradas - saidas).toLocaleString('pt-br',{style: 'currency', currency: 'BRL'});
-        });
-    </script>
-
-    <script>
-        // BLINDAGEM - Bloqueia clique direito e F12
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 67 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false;
-        };
-        // Registra o Service Worker para habilitar a instalação (PWA)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker ativo!', reg))
-        .catch(err => console.log('Erro no SW:', err));
-    });
-  }
-    </script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
