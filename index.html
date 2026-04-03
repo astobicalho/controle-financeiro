@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanças - Urbano Publicidade</title>
+    <title>Controle de Contas - Urbano Publicidade</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,7 +42,7 @@
         .btn-acao { padding: 8px; font-size: 12px; border-radius: 6px; border: 1px solid #fff; cursor: pointer; color: white; margin-left: 4px; display: none; background: transparent; min-width: 35px; }
         .btn-edit { border-color: #f39c12; color: #f39c12; }
         .btn-delete { border-color: var(--saida); color: var(--saida); }
-        .btn-status { background: transparent; border: 1px solid #555; font-size: 10px; width: 100%; margin-top: 5px; color: white; border-radius: 4px; padding: 4px; }
+        .btn-status { background: transparent; border: 1px solid #555; font-size: 10px; width: 100%; margin-top: 5px; color: white; border-radius: 4px; padding: 6px; font-weight: bold; }
         .btn-pago { border-color: var(--entrada); color: var(--entrada); }
         
         .resumo-item { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
@@ -53,17 +53,17 @@
         
         footer { margin-top: 20px; padding: 20px; text-align: center; font-size: 12px; color: #666; width: 100%; border-top: 1px solid #333; }
         footer b { color: var(--primary); }
-        .row-pago { opacity: 0.5; text-decoration: line-through; }
+        .row-pago { opacity: 0.6; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align: center; color: var(--primary);">UP - Finanças</h2>
+    <h2 style="text-align: center; color: var(--primary);">UP - Controle de Contas</h2>
 
     <div class="card">
         <input type="hidden" id="editId">
-        <input type="text" id="desc" placeholder="Descrição">
+        <input type="text" id="desc" placeholder="Descrição (Ex: Aluguel)">
         <input type="number" id="valor" placeholder="Valor R$ 0,00" step="0.01">
         <input type="date" id="data">
         
@@ -98,10 +98,10 @@
     </div>
 
     <div class="card">
-        <div class="resumo-item" style="color: var(--entrada);">Entradas: <span id="totalEntradas">R$ 0,00</span></div>
-        <div class="resumo-item" style="color: var(--saida);">Saídas: <span id="totalSaidas">R$ 0,00</span></div>
+        <div class="resumo-item" style="color: var(--entrada);">Receitas (+): <span id="totalEntradas">R$ 0,00</span></div>
+        <div class="resumo-item" style="color: var(--saida);">Pagos (-): <span id="totalSaidas">R$ 0,00</span></div>
         <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
-        <div class="resumo-item" style="font-size: 1.2rem;">Saldo: <span id="saldoFinal">R$ 0,00</span></div>
+        <div class="resumo-item" style="font-size: 1.2rem;">Saldo Real: <span id="saldoFinal">R$ 0,00</span></div>
         
         <button class="btn-admin" style="color: var(--entrada); border-color: var(--entrada);" onclick="window.toggleEntradas()">⚙ GERENCIAR ENTRADAS</button>
         
@@ -115,7 +115,7 @@
     <div class="card" style="padding: 10px; overflow-x: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="margin: 0; font-size: 1rem; color: var(--primary);">Lista de Despesas</h3>
-            <button class="btn-admin" onclick="window.toggleAcoes()">⚙ GERENCIAR DESPESAS</button>
+            <button class="btn-admin" onclick="window.toggleAcoes()">⚙ EDITAR/EXCLUIR</button>
         </div>
         <table style="width: 100%;">
             <tbody id="listaContas"></tbody>
@@ -167,7 +167,7 @@
             categoria: document.getElementById('categoria').value,
             timestamp: new Date()
         };
-        if (!dados.descricao || !dados.valor || !dados.data) return alert("Preencha tudo!");
+        if (!dados.descricao || !dados.valor || !dados.data) return alert("Preencha todos os campos!");
         try {
             if (id) {
                 await updateDoc(doc(db, "contas", id), dados);
@@ -177,7 +177,7 @@
                 await addDoc(collection(db, "contas"), { ...dados, status: "PENDENTE" });
             }
             document.getElementById('desc').value = ""; document.getElementById('valor').value = "";
-        } catch (e) { alert("Erro ao salvar!"); }
+        } catch (e) { alert("Erro ao salvar no Firebase!"); }
     };
 
     window.prepararEdicao = async (id) => {
@@ -199,7 +199,7 @@
         await updateDoc(doc(db, "contas", id), { status: statusAtual === "PENDENTE" ? "PAGO" : "PENDENTE" });
     };
 
-    window.excluirConta = async (id) => { if(confirm("Apagar registro?")) await deleteDoc(doc(db, "contas", id)); };
+    window.excluirConta = async (id) => { if(confirm("Apagar este registro permanentemente?")) await deleteDoc(doc(db, "contas", id)); };
 
     function atualizarGrafico(dadosCategorias) {
         const ctx = document.getElementById('graficoPizza').getContext('2d');
@@ -226,43 +226,47 @@
             const icones = { "Água":"💧","Luz":"⚡","Gás":"🔥","Cartão/Crédito":"💳","Celular":"📱","Cerrado":"🌳","Iptu":"🏠","Internet":"🌐","Empréstimo":"💸","Pres. Carro":"🚗","Outros":"📁" };
             const classes = { "Água":"cat-agua","Luz":"cat-luz","Gás":"cat-gas","Cartão/Crédito":"cat-cartao","Celular":"cat-celular","Cerrado":"cat-cerrado","Iptu":"cat-iptu","Internet":"cat-internet","Empréstimo":"cat-emprestimo","Pres. Carro":"cat-carro","Outros":"cat-outros" };
 
-            // Localize esta parte dentro da função carregarDados:
-snapshot.forEach((doc) => {
-    const item = doc.data();
-    const v = parseFloat(item.valor);
-    const catStr = item.categoria || "Outros";
-    const displayAcoes = acoesVisiveis ? 'inline-block' : 'none';
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const v = parseFloat(item.valor);
+                const catStr = item.categoria || "Outros";
+                const displayAcoes = acoesVisiveis ? 'inline-block' : 'none';
 
-    // AJUSTE AQUI: O segredo está em checar o item.tipo CORRETAMENTE
-    if (item.tipo === "+") { 
-        // Se for Entrada (+), vai para a tabela de receitas
-        ent += v;
-        tbodyEntradas.innerHTML += `
-            <tr>
-                <td>${item.descricao}</td>
-                <td>${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td>
-                <td style="text-align:right;">
-                    <button class="btn-acao btn-edit" style="display:inline-block" onclick="window.prepararEdicao('${doc.id}')">✎</button>
-                    <button class="btn-acao btn-delete" style="display:inline-block" onclick="window.excluirConta('${doc.id}')">✖</button>
-                </td>
-            </tr>`;
-    } else {
-        // Se for Saída (-), vai para a lista de despesas
-        sai += v;
-        resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
-        tbodyGastos.innerHTML += `
-            <tr class="${item.status === 'PAGO' ? 'row-pago' : ''}">
-                <td><strong>${item.descricao}</strong><br><span class="categoria-badge ${classes[catStr] || 'cat-outros'}">${icones[catStr] || '📁'} ${catStr}</span></td>
-                <td style="color:var(--saida); font-weight:bold;">${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}<br>
-                    <button class="btn-status ${item.status === 'PAGO' ? 'btn-pago' : ''}" onclick="window.alternarStatus('${doc.id}','${item.status}')">${item.status}</button>
-                </td>
-                <td style="text-align:right;">
-                    <button class="btn-acao btn-edit" style="display:${displayAcoes}" onclick="window.prepararEdicao('${doc.id}')">✎</button>
-                    <button class="btn-acao btn-delete" style="display:${displayAcoes}" onclick="window.excluirConta('${doc.id}')">✖</button>
-                </td>
-            </tr>`;
-    }
-});
+                if (item.tipo === "+") {
+                    ent += v;
+                    tbodyEntradas.innerHTML += `
+                        <tr>
+                            <td>${item.descricao}</td>
+                            <td>${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}</td>
+                            <td style="text-align:right;">
+                                <button class="btn-acao btn-edit" style="display:inline-block" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                                <button class="btn-acao btn-delete" style="display:inline-block" onclick="window.excluirConta('${doc.id}')">✖</button>
+                            </td>
+                        </tr>`;
+                } else {
+                    // SÓ ADICIONA À SAÍDA SE ESTIVER PAGO
+                    if (item.status === "PAGO") {
+                        sai += v;
+                    }
+                    
+                    // O gráfico mostra todas as despesas do mês para planejamento
+                    resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
+                    
+                    tbodyGastos.innerHTML += `
+                        <tr class="${item.status === 'PAGO' ? 'row-pago' : ''}">
+                            <td><strong>${item.descricao}</strong><br><span class="categoria-badge ${classes[catStr] || 'cat-outros'}">${icones[catStr] || '📁'} ${catStr}</span></td>
+                            <td style="color:var(--saida); font-weight:bold;">${v.toLocaleString('pt-br',{style:'currency',currency:'BRL'})}<br>
+                                <button class="btn-status ${item.status === 'PAGO' ? 'btn-pago' : ''}" onclick="window.alternarStatus('${doc.id}','${item.status}')">
+                                    ${item.status === 'PAGO' ? '✅ PAGO' : '⏳ PENDENTE'}
+                                </button>
+                            </td>
+                            <td style="text-align:right;">
+                                <button class="btn-acao btn-edit" style="display:${displayAcoes}" onclick="window.prepararEdicao('${doc.id}')">✎</button>
+                                <button class="btn-acao btn-delete" style="display:${displayAcoes}" onclick="window.excluirConta('${doc.id}')">✖</button>
+                            </td>
+                        </tr>`;
+                }
+            });
             document.getElementById('totalEntradas').innerText = ent.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             document.getElementById('totalSaidas').innerText = sai.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             document.getElementById('saldoFinal').innerText = (ent - sai).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
