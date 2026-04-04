@@ -20,6 +20,10 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; flex: 1; }
         .card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #333; position: relative; }
+        
+        /* AJUSTE NO CARD DO OLHINHO */
+        .card-resumo { padding-top: 40px !important; } 
+
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: #fff; box-sizing: border-box; font-size: 16px; }
         
         button { 
@@ -51,12 +55,13 @@
         
         .btn-admin { background: transparent; border: 1px solid var(--primary); color: var(--primary); font-size: 11px; padding: 8px; width: auto; margin-top: 5px; }
         
-        .btn-eye { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--primary); width: auto; padding: 5px; }
+        /* POSIÇÃO DO OLHINHO REVISADA */
+        .btn-eye { position: absolute; top: 12px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--primary); width: auto; padding: 0; z-index: 10; }
 
         footer { margin-top: 20px; padding: 20px; text-align: center; font-size: 12px; color: #666; width: 100%; border-top: 1px solid #333; }
         footer b { color: var(--primary); }
         .row-pago { opacity: 0.6; }
-        .hidden-value { filter: blur(5px); pointer-events: none; }
+        .hidden-value { filter: blur(6px); pointer-events: none; user-select: none; }
     </style>
 </head>
 <body>
@@ -64,6 +69,7 @@
 <div class="container">
     <h2 style="text-align: center; color: var(--primary);">UP - Controle de Contas</h2>
 
+    <!-- Card de Cadastro -->
     <div class="card">
         <input type="hidden" id="editId">
         <input type="text" id="desc" placeholder="Descrição (Ex: Aluguel)">
@@ -91,17 +97,21 @@
         <button id="btnSalvar" onclick="window.salvarRegistro()">SALVAR REGISTRO</button>
     </div>
 
+    <!-- Filtro -->
     <div class="card" style="padding: 10px; display: flex; align-items: center; gap: 10px; justify-content: center;">
         <label>📅 Mês:</label>
         <input type="month" id="filtroMes" style="margin: 0; width: auto;">
     </div>
 
+    <!-- Gráfico -->
     <div class="card">
         <div class="chart-container"><canvas id="graficoPizza"></canvas></div>
     </div>
 
-    <div class="card">
+    <!-- Resumo com Olhinho Corrigido -->
+    <div class="card card-resumo">
         <button class="btn-eye" id="togglePrivacidade" onclick="window.togglePrivacidade()">👁️</button>
+        
         <div class="resumo-item" style="color: var(--entrada);">Receitas (+): <span id="totalEntradas" class="valor-sensivel">R$ 0,00</span></div>
         <div class="resumo-item" style="color: var(--saida);">Pagos (-): <span id="totalSaidas" class="valor-sensivel">R$ 0,00</span></div>
         <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
@@ -116,6 +126,7 @@
         </div>
     </div>
 
+    <!-- Lista de Despesas -->
     <div class="card" style="padding: 10px; overflow-x: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="margin: 0; font-size: 1rem; color: var(--primary);">Lista de Despesas</h3>
@@ -151,7 +162,6 @@
     let acoesVisiveis = false;
     let modoPrivado = false;
 
-    // FUNÇÃO DO OLHINHO
     window.togglePrivacidade = () => {
         modoPrivado = !modoPrivado;
         const elementos = document.querySelectorAll('.valor-sensivel');
@@ -286,7 +296,6 @@
             document.getElementById('saldoFinal').innerText = (ent - sai).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             atualizarGrafico(resumoCat);
 
-            // Reaplica a privacidade se estiver ativa ao recarregar os dados
             const elementos = document.querySelectorAll('.valor-sensivel');
             elementos.forEach(el => {
                 if(modoPrivado) el.classList.add('hidden-value');
