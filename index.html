@@ -19,7 +19,7 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; flex: 1; }
-        .card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #333; }
+        .card { background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #333; position: relative; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: #fff; box-sizing: border-box; font-size: 16px; }
         
         button { 
@@ -51,9 +51,12 @@
         
         .btn-admin { background: transparent; border: 1px solid var(--primary); color: var(--primary); font-size: 11px; padding: 8px; width: auto; margin-top: 5px; }
         
+        .btn-eye { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--primary); width: auto; padding: 5px; }
+
         footer { margin-top: 20px; padding: 20px; text-align: center; font-size: 12px; color: #666; width: 100%; border-top: 1px solid #333; }
         footer b { color: var(--primary); }
         .row-pago { opacity: 0.6; }
+        .hidden-value { filter: blur(5px); pointer-events: none; }
     </style>
 </head>
 <body>
@@ -98,16 +101,17 @@
     </div>
 
     <div class="card">
-        <div class="resumo-item" style="color: var(--entrada);">Receitas (+): <span id="totalEntradas">R$ 0,00</span></div>
-        <div class="resumo-item" style="color: var(--saida);">Pagos (-): <span id="totalSaidas">R$ 0,00</span></div>
+        <button class="btn-eye" id="togglePrivacidade" onclick="window.togglePrivacidade()">👁️</button>
+        <div class="resumo-item" style="color: var(--entrada);">Receitas (+): <span id="totalEntradas" class="valor-sensivel">R$ 0,00</span></div>
+        <div class="resumo-item" style="color: var(--saida);">Pagos (-): <span id="totalSaidas" class="valor-sensivel">R$ 0,00</span></div>
         <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
-        <div class="resumo-item" style="font-size: 1.2rem;">Saldo Real: <span id="saldoFinal">R$ 0,00</span></div>
+        <div class="resumo-item" style="font-size: 1.2rem;">Saldo Real: <span id="saldoFinal" class="valor-sensivel">R$ 0,00</span></div>
         
         <button class="btn-admin" style="color: var(--entrada); border-color: var(--entrada);" onclick="window.toggleEntradas()">⚙ GERENCIAR ENTRADAS</button>
         
         <div id="listaEntradasContainer">
             <table style="width: 100%;">
-                <tbody id="listaEntradasEdit"></tbody>
+                <tbody id="listaEntradasEdit" class="valor-sensivel"></tbody>
             </table>
         </div>
     </div>
@@ -118,7 +122,7 @@
             <button class="btn-admin" onclick="window.toggleAcoes()">⚙ EDITAR/EXCLUIR</button>
         </div>
         <table style="width: 100%;">
-            <tbody id="listaContas"></tbody>
+            <tbody id="listaContas" class="valor-sensivel"></tbody>
         </table>
     </div>
 </div>
@@ -145,6 +149,21 @@
     const db = getFirestore(app);
     let meuGrafico = null;
     let acoesVisiveis = false;
+    let modoPrivado = false;
+
+    // FUNÇÃO DO OLHINHO
+    window.togglePrivacidade = () => {
+        modoPrivado = !modoPrivado;
+        const elementos = document.querySelectorAll('.valor-sensivel');
+        const btn = document.getElementById('togglePrivacidade');
+        
+        elementos.forEach(el => {
+            if(modoPrivado) el.classList.add('hidden-value');
+            else el.classList.remove('hidden-value');
+        });
+        
+        btn.innerText = modoPrivado ? "🙈" : "👁️";
+    };
 
     window.toggleEntradas = () => {
         const div = document.getElementById('listaEntradasContainer');
@@ -244,12 +263,7 @@
                             </td>
                         </tr>`;
                 } else {
-                    // SÓ ADICIONA À SAÍDA SE ESTIVER PAGO
-                    if (item.status === "PAGO") {
-                        sai += v;
-                    }
-                    
-                    // O gráfico mostra todas as despesas do mês para planejamento
+                    if (item.status === "PAGO") sai += v;
                     resumoCat[catStr] = (resumoCat[catStr] || 0) + v;
                     
                     tbodyGastos.innerHTML += `
@@ -271,6 +285,13 @@
             document.getElementById('totalSaidas').innerText = sai.toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             document.getElementById('saldoFinal').innerText = (ent - sai).toLocaleString('pt-br',{style:'currency',currency:'BRL'});
             atualizarGrafico(resumoCat);
+
+            // Reaplica a privacidade se estiver ativa ao recarregar os dados
+            const elementos = document.querySelectorAll('.valor-sensivel');
+            elementos.forEach(el => {
+                if(modoPrivado) el.classList.add('hidden-value');
+                else el.classList.remove('hidden-value');
+            });
         });
     }
     const campoFiltro = document.getElementById('filtroMes');
